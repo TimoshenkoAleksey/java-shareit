@@ -1,5 +1,8 @@
 package ru.practicum.shareit.exception;
 
+import lombok.Getter;
+
+@Getter
 public class EmailException extends RuntimeException {
     private final String parameter;
 
@@ -7,7 +10,4 @@ public class EmailException extends RuntimeException {
         this.parameter = parameter;
     }
 
-    public String getParameter() {
-        return parameter;
-    }
 }

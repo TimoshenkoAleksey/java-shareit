@@ -133,18 +133,21 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto update(long userId, long bookingId, boolean approved) {
         valid.checkUser(userId);
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() ->
-                new NotFoundException(format("Запроса с id = %s нет в базе", bookingId)));
+                new NotFoundException(format("Бронирования с id = %s нет в базе", bookingId)));
         long ownerId = booking.getItem().getOwner().getId();
         if (userId == ownerId) {
             if (approved) {
-                if (booking.getStatus().equals(Status.APPROVED)) {
-                    throw new ValidationException("Владелец уже одобрил бронирование");
-                } else {
-                    booking.setStatus(Status.APPROVED);
+                if (booking.getStatus() != null) {
+                    if (booking.getStatus().equals(Status.APPROVED)) {
+                        throw new ValidationException("Владелец уже одобрил бронирование");
+                    }
                 }
+                booking.setStatus(Status.APPROVED);
             } else {
-                if (booking.getStatus().equals(Status.REJECTED)) {
-                    throw new ValidationException("Владелец уже отклонил бронирование");
+                if (booking.getStatus() != null) {
+                    if (booking.getStatus().equals(Status.REJECTED)) {
+                        throw new ValidationException("Владелец уже отклонил бронирование");
+                    }
                 }
                 booking.setStatus(Status.REJECTED);
             }

@@ -9,6 +9,7 @@ import ru.practicum.shareit.user.model.User;
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 @Data
@@ -21,6 +22,7 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @NotEmpty
+    @Size(max = 1024)
     private String text;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id")

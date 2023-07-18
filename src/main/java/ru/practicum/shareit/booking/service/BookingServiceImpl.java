@@ -137,17 +137,13 @@ public class BookingServiceImpl implements BookingService {
         long ownerId = booking.getItem().getOwner().getId();
         if (userId == ownerId) {
             if (approved) {
-                if (booking.getStatus() != null) {
-                    if (booking.getStatus().equals(Status.APPROVED)) {
-                        throw new ValidationException("Владелец уже одобрил бронирование");
-                    }
+                if (Status.APPROVED.equals(booking.getStatus())) {
+                    throw new ValidationException("Владелец уже одобрил бронирование");
                 }
                 booking.setStatus(Status.APPROVED);
             } else {
-                if (booking.getStatus() != null) {
-                    if (booking.getStatus().equals(Status.REJECTED)) {
-                        throw new ValidationException("Владелец уже отклонил бронирование");
-                    }
+                if (Status.REJECTED.equals(booking.getStatus())) {
+                    throw new ValidationException("Владелец уже отклонил бронирование");
                 }
                 booking.setStatus(Status.REJECTED);
             }

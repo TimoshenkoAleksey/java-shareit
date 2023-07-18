@@ -2,6 +2,8 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.dto.BookingDtoForOwner;
+import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingService;
@@ -21,7 +23,9 @@ import ru.practicum.shareit.validation.Valid;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,7 +48,7 @@ public class ItemServiceImpl implements ItemService {
         } else {
             itemDto = ItemMapper.toItemDto(item);
         }
-        itemDto.setComments(commentRepository.getAllByItemId(itemId).stream()
+        itemDto.setComments(commentRepository.findAllByItemId(itemId).stream()
                 .map(CommentMapper::toCommentDto).collect(Collectors.toList()));
         return itemDto;
     }
@@ -52,15 +56,33 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDto> getItemsByUserId(long userId) {
         valid.checkUser(userId);
-        List<ItemDto> itemDto = itemRepository.findByOwnerId(userId).stream()
+        List<Item> items = itemRepository.findAllByOwnerId(userId);
+        List<ItemDto> itemsDto = items.stream()
                 .map(ItemMapper::toItemDtoForOwner).collect(Collectors.toList());
-        for (ItemDto item : itemDto) {
-            item.setLastBooking(bookingService.getLastBooking(item.getId()));
-            item.setNextBooking(bookingService.getNextBooking(item.getId()));
-            item.setComments(commentRepository.getAllByItemId(item.getId()).stream()
-                    .map(CommentMapper::toCommentDto).collect(Collectors.toList()));
-        }
-        return itemDto;
+        List<Booking> bookings = bookingRepository.findAllByItemIn(items);
+        List<Comment> comments = commentRepository.findAllByItemIn(items);
+            for (ItemDto item : itemsDto) {
+                List<Booking> bookingByItem = bookings.stream()
+                        .filter(booking -> Objects.equals(booking.getItem().getId(), item.getId()))
+                        .collect(Collectors.toList());
+                item.setLastBooking(bookingByItem.stream()
+                        .filter(booking -> booking.getStart().isBefore(LocalDateTime.now()))
+                        .filter(booking -> Objects.equals(booking.getStatus(), Status.APPROVED))
+                        .map(BookingMapper::toBookingDtoForOwner)
+                        .max(Comparator.comparing(BookingDtoForOwner::getEnd))
+                        .orElse(null));
+                item.setNextBooking(bookingByItem.stream()
+                        .filter(booking -> booking.getStart().isAfter(LocalDateTime.now()))
+                        .filter(booking -> Objects.equals(booking.getStatus(), Status.APPROVED))
+                        .map(BookingMapper::toBookingDtoForOwner)
+                        .min(Comparator.comparing(BookingDtoForOwner::getStart))
+                        .orElse(null));
+                item.setComments(comments.stream()
+                        .filter(comment -> Objects.equals(comment.getItem().getId(), item.getId()))
+                        .map(CommentMapper::toCommentDto)
+                        .collect(Collectors.toList()));
+            }
+        return itemsDto;
     }
 
     @Override

@@ -9,7 +9,7 @@ import java.util.List;
 
 @Repository
 public interface ItemRepository extends JpaRepository<Item, Long> {
-    List<Item> findByOwnerId(long userId);
+    List<Item> findAllByOwnerId(long userId);
 
     @Query(value = "select i from Item i where lower(i.name) like %?1% or lower(i.description) like %?1% " +
     "and i.available=true")

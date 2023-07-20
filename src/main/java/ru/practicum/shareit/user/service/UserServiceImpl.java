@@ -1,51 +1,51 @@
 package ru.practicum.shareit.user.service;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.EmailException;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.validation.Valid;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final Valid valid;
 
     @Override
     public List<UserDto> findAllUsers() {
-        return userRepository.findAllUsers().stream().map(UserMapper::toUserDto)
+        return userRepository.findAll().stream().map(UserMapper::toUserDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public UserDto findUserDtoById(long id) {
-        return UserMapper.toUserDto(userRepository.findUserById(id));
+    public UserDto findUserById(long id) {
+        User user = valid.checkUser(id);
+        return UserMapper.toUserDto(user);
     }
 
     @Override
-    public UserDto addUserDto(UserDto userDto) {
+    public UserDto addUser(UserDto userDto) {
         validationBeforeAdd(userDto);
-        if (userRepository.isEmailPresentInRepository(UserMapper.toUser(userDto))) {
-            throw new EmailException(userDto.getEmail());
-        }
-        return UserMapper.toUserDto(userRepository.addUser(UserMapper.toUser(userDto)));
+        return UserMapper.toUserDto(userRepository.save(UserMapper.toUser(userDto)));
     }
 
     @Override
-    public UserDto updateUserDto(long id, UserDto userDto) {
+    public UserDto updateUser(long id, UserDto userDto) {
         User user = validationBeforeUpdate(id, userDto);
-        return UserMapper.toUserDto(userRepository.updateUser(id, user));
+        return UserMapper.toUserDto(userRepository.save(user));
     }
 
     @Override
-    public boolean deleteUser(long id) {
-        return userRepository.deleteUser(id);
+    public void deleteUser(long id) {
+        userRepository.deleteById(id);
     }
 
     private void validationBeforeAdd(UserDto userDto) {
@@ -59,7 +59,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private User validationBeforeUpdate(long id, UserDto userDto) {
-        User user = userRepository.findUserById(id);
+        User user = valid.checkUser(id);
         if (userDto.getName() != null) {
             if (userDto.getName().isBlank()) {
                 throw new ValidationException("Имя пользователя не должно быть пустым");
@@ -70,12 +70,23 @@ public class UserServiceImpl implements UserService {
             if (userDto.getEmail().isBlank()) {
                 throw new EmailException("Email не должен быть пустым");
             }
-            if (!user.getEmail().equals(userDto.getEmail()) && userRepository.isEmailPresentInRepository(UserMapper
+            if (!user.getEmail().equals(userDto.getEmail()) && isEmailPresentInRepository(UserMapper
                     .toUser(userDto))) {
-                throw new EmailException(String.format("%s уже есть в базе у другого пользователя", userDto.getEmail()));
+                throw new EmailException(String.format("Email %s уже есть в базе у другого пользователя", userDto.getEmail()));
             }
             user.setEmail(userDto.getEmail());
         }
         return user;
+    }
+
+    private boolean isEmailPresentInRepository(User user) {
+        boolean isPresent = false;
+        for (User otherUser : userRepository.findAll()) {
+            if (otherUser.getEmail().equals(user.getEmail())) {
+                isPresent = true;
+                break;
+            }
+        }
+        return isPresent;
     }
 }

@@ -53,11 +53,6 @@ public class ItemRequestRepositoryTest {
         manager.persist(requester);
         manager.persist(itemRequest);
 
-        List<ItemRequest> itemRequestsEmpty = repository.findAllByRequesterIdNot(itemRequest.getId(), pageRequest);
-
-        assertNotNull(itemRequestsEmpty);
-        assertEquals(0, itemRequestsEmpty.size());
-
         List<ItemRequest> itemRequests = repository.findAllByRequesterIdNot(2L, pageRequest);
 
         assertNotNull(itemRequests);

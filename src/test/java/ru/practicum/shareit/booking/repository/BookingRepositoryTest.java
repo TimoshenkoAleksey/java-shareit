@@ -42,7 +42,6 @@ public class BookingRepositoryTest {
         manager.persist(owner);
         manager.persist(item);
         manager.persist(booking);
-
     }
 
     @Test

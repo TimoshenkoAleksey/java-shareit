@@ -5,6 +5,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
@@ -14,8 +16,7 @@ import ru.practicum.shareit.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -31,7 +32,7 @@ public class UserServiceTest {
     private final User user = new User(1L, "John", "john.doe@mail.com");
 
     @Test
-    void findAllUsers() {
+    void findAllUsersTest() {
         when(userRepository.findAll())
                 .thenReturn(List.of(user));
 
@@ -46,7 +47,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void findUserById() {
+    void findUserByIdTest() {
         Long userId = user.getId();
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
@@ -60,7 +61,16 @@ public class UserServiceTest {
     }
 
     @Test
-    void addUser() {
+    void findUserByIdWithoutUser() {
+        Long userId = user.getId();
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+                () -> userService.findUserById(userId));
+    }
+
+    @Test
+    void addUserTest() {
         when(userRepository.save(user))
                 .thenReturn(user);
 
@@ -74,7 +84,23 @@ public class UserServiceTest {
     }
 
     @Test
-    void updateUser() {
+    void addUserWithNullEmail() {
+        user.setEmail(null);
+
+        assertThrows(ValidationException.class,
+                () -> userService.addUser(UserMapper.toUserDto(user)));
+    }
+
+    @Test
+    void addUserWithNullName() {
+        user.setName(null);
+
+        assertThrows(ValidationException.class,
+                () -> userService.addUser(UserMapper.toUserDto(user)));
+    }
+
+    @Test
+    void updateUserTest() {
         Long userId = user.getId();
         when(userRepository.save(user)).thenReturn(user);
         when(valid.checkUser(userId)).thenReturn(user);
@@ -89,7 +115,17 @@ public class UserServiceTest {
     }
 
     @Test
-    void deleteUser() {
+    void updateUserWithEmptyName() {
+        Long userId = user.getId();
+        user.setName("");
+        when(valid.checkUser(userId)).thenReturn(user);
+
+        assertThrows(ValidationException.class,
+                () -> userService.updateUser(userId, UserMapper.toUserDto(user)));
+    }
+
+    @Test
+    void deleteUserTest() {
         Long userId = user.getId();
 
         userService.deleteUser(userId);

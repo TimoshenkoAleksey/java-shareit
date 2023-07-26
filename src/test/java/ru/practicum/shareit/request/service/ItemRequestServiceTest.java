@@ -49,7 +49,7 @@ public class ItemRequestServiceTest {
     private final long userId = 1L;
 
     @Test
-    void add() {
+    void addTest() {
         ItemRequest itemRequest1 = ItemRequestMapper.toItemRequest(itemRequestDto, requester);
         when(itemRequestRepository.save(any())).thenReturn(itemRequest1);
         when(valid.checkUser(userId)).thenReturn(requester);
@@ -63,7 +63,7 @@ public class ItemRequestServiceTest {
     }
 
     @Test
-    void getByUserId() {
+    void getByUserIdTest() {
         when(itemRepository.findAllByRequestIdIn(anyList()))
                 .thenReturn(Collections.emptyList());
         when(itemRequestRepository.findAllByRequesterId(userId))
@@ -78,7 +78,7 @@ public class ItemRequestServiceTest {
     }
 
     @Test
-    void getAll() {
+    void getAllTest() {
         when(itemRepository.findAllByRequestIdIn(anyList()))
                 .thenReturn(List.of(item));
         when(itemRequestRepository.findAllByRequesterIdNot(userId, pageRequest))
@@ -94,7 +94,7 @@ public class ItemRequestServiceTest {
 
     @Test
     @SneakyThrows
-    void getById() {
+    void getByIdTest() {
         Long itemRequestId = itemRequest.getId();
         when(itemRepository.findAllByRequestId(anyLong()))
                 .thenReturn(List.of(item));

@@ -12,6 +12,8 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.status.Status;
 import ru.practicum.shareit.exception.IllegalStatusException;
+import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
@@ -49,7 +51,7 @@ public class BookingServiceTest {
     long ownerId = owner.getId();
 
     @Test
-    void findById() {
+    void findByIdTest() {
         when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(booking));
         when(valid.checkUser(ownerId)).thenReturn(user);
 
@@ -63,7 +65,16 @@ public class BookingServiceTest {
     }
 
     @Test
-    void findAllBookingsByUserId_StateAll() {
+    void findByIdWithNotOwnerId() {
+        when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(booking));
+        when(valid.checkUser(ownerId)).thenReturn(user);
+
+        assertThrows(NotFoundException.class,
+                () -> bookingService.findById(bookingId, 3L));
+    }
+
+    @Test
+    void findAllBookingsByUserIdWithStateAll() {
         String state = "ALL";
         when(bookingRepository.findAllByBookerId(anyLong(), any())).thenReturn(List.of(booking));
         when(valid.checkUser(ownerId)).thenReturn(user);
@@ -79,7 +90,7 @@ public class BookingServiceTest {
     }
 
     @Test
-    void findAllBookingsByUserId_StateCurrent() {
+    void findAllBookingsByUserIdWithStateCurrent() {
         String state = "CURRENT";
         when(bookingRepository.findAllByBookerIdAndStartIsBeforeAndEndIsAfter(anyLong(), any(), any(), any()))
                 .thenReturn(List.of(booking));
@@ -97,7 +108,7 @@ public class BookingServiceTest {
     }
 
     @Test
-    void findAllBookingsByUserId_StatePast() {
+    void findAllBookingsByUserIdWithStatePast() {
         String state = "PAST";
         when(bookingRepository.findAllByBookerIdAndEndIsBefore(anyLong(), any(), any()))
                 .thenReturn(List.of(booking));
@@ -115,7 +126,7 @@ public class BookingServiceTest {
     }
 
     @Test
-    void findAllBookingsByUserId_StateFuture() {
+    void findAllBookingsByUserIdWithStateFuture() {
         String state = "FUTURE";
         when(bookingRepository.findAllByBookerIdAndStartIsAfter(anyLong(), any(), any()))
                 .thenReturn(List.of(booking));
@@ -133,7 +144,7 @@ public class BookingServiceTest {
     }
 
     @Test
-    void findAllBookingsByUserId_StateWaitting() {
+    void findAllBookingsByUserIdWithStateWaiting() {
         String state = "WAITING";
         when(bookingRepository.findAllByBookerIdAndStatus(anyLong(), any(), any()))
                 .thenReturn(List.of(booking));
@@ -150,7 +161,7 @@ public class BookingServiceTest {
     }
 
     @Test
-    void findAllBookingsByUserId_StateRejected() {
+    void findAllBookingsByUserIdWithStateRejected() {
         String state = "REJECTED";
         when(bookingRepository.findAllByBookerIdAndStatus(anyLong(), any(), any()))
                 .thenReturn(List.of(booking));
@@ -167,7 +178,7 @@ public class BookingServiceTest {
     }
 
     @Test
-    void findAllBookingsByUserId_OtherState() {
+    void findAllBookingsByUserIdWithOtherState() {
         String state = "OTHER";
         when(valid.checkUser(ownerId)).thenReturn(user);
 
@@ -192,7 +203,7 @@ public class BookingServiceTest {
     }
 
     @Test
-    void findAllBookingsByItemOwnerId_StateCurrent() {
+    void findAllBookingsByItemOwnerIdWithStateCurrent() {
         String state = "CURRENT";
         when(bookingRepository.findAllByItemOwnerIdAndStartIsBeforeAndEndIsAfter(anyLong(), any(), any(), any()))
                 .thenReturn(List.of(booking));
@@ -210,7 +221,7 @@ public class BookingServiceTest {
     }
 
     @Test
-    void findAllBookingsByItemOwnerId_StatePast() {
+    void findAllBookingsByItemOwnerIdWithStatePast() {
         String state = "PAST";
         when(bookingRepository.findAllByItemOwnerIdAndEndIsBefore(anyLong(), any(), any()))
                 .thenReturn(List.of(booking));
@@ -228,7 +239,7 @@ public class BookingServiceTest {
     }
 
     @Test
-    void findAllBookingsByItemOwnerId_StateFuture() {
+    void findAllBookingsByItemOwnerIdWithStateFuture() {
         String state = "FUTURE";
         when(bookingRepository.findAllByItemOwnerIdAndStartIsAfter(anyLong(), any(), any()))
                 .thenReturn(List.of(booking));
@@ -246,7 +257,7 @@ public class BookingServiceTest {
     }
 
     @Test
-    void findAllBookingsByItemOwnerId_StateWaitting() {
+    void findAllBookingsByItemOwnerIdWithStateWaiting() {
         String state = "WAITING";
         when(bookingRepository.findAllByItemOwnerIdAndStatus(anyLong(), any(), any()))
                 .thenReturn(List.of(booking));
@@ -263,7 +274,7 @@ public class BookingServiceTest {
     }
 
     @Test
-    void findAllBookingsByItemOwnerId_StateRejected() {
+    void findAllBookingsByItemOwnerIdWithStateRejected() {
         String state = "REJECTED";
         when(bookingRepository.findAllByItemOwnerIdAndStatus(anyLong(), any(), any()))
                 .thenReturn(List.of(booking));
@@ -280,7 +291,7 @@ public class BookingServiceTest {
     }
 
     @Test
-    void findAllBookingsByItemOwnerId_OtherState() {
+    void findAllBookingsByItemOwnerIdWithOtherState() {
         String state = "OTHER";
         when(valid.checkUser(ownerId)).thenReturn(user);
 
@@ -289,7 +300,7 @@ public class BookingServiceTest {
     }
 
     @Test
-    void add() {
+    void addTest() {
         long userId = 1L;
         when(bookingRepository.save(any())).thenReturn(booking);
         when(valid.checkUser(userId)).thenReturn(user);
@@ -304,7 +315,16 @@ public class BookingServiceTest {
     }
 
     @Test
-    void update() {
+    void addWithFalseAvailable() {
+        item.setAvailable(false);
+        when(valid.checkItem(itemId)).thenReturn(item);
+
+        assertThrows(ValidationException.class,
+                () -> bookingService.add(3L, bookingDtoFrontend));
+    }
+
+    @Test
+    void updateTest() {
         when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(booking));
         when(bookingRepository.save(booking)).thenReturn(booking);
         when(valid.checkUser(ownerId)).thenReturn(owner);
@@ -319,7 +339,27 @@ public class BookingServiceTest {
     }
 
     @Test
-    void getLastBooking() {
+    void updateWithAlreadyApprovedOwner() {
+        booking.setStatus(Status.APPROVED);
+        when(bookingRepository.findById(anyLong())).thenReturn(Optional.of(booking));
+        when(valid.checkUser(ownerId)).thenReturn(owner);
+
+        assertThrows(ValidationException.class,
+                () -> bookingService.update(ownerId, bookingId, true));
+    }
+
+    @Test
+    void updateWithAlreadyRejectOwner() {
+        booking.setStatus(Status.REJECTED);
+        when(bookingRepository.findById(anyLong())).thenReturn(Optional.of(booking));
+        when(valid.checkUser(ownerId)).thenReturn(owner);
+
+        assertThrows(ValidationException.class,
+                () -> bookingService.update(ownerId, bookingId, false));
+    }
+
+    @Test
+    void getLastBookingTest() {
         when(bookingRepository.findFirstByItemIdAndStartBeforeAndStatus(anyLong(), any(), any(), any()))
                 .thenReturn(booking);
 
@@ -333,7 +373,7 @@ public class BookingServiceTest {
     }
 
     @Test
-    void getNextBooking() {
+    void getNextBookingTest() {
         when(bookingRepository.findFirstByItemIdAndStartAfterAndStatus(anyLong(), any(), any(), any()))
                 .thenReturn(booking);
 

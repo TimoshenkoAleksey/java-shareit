@@ -38,7 +38,10 @@ public class ValidTest {
 
         User actualUser = valid.checkUser(userId);
 
+        assertNotNull(actualUser);
+        assertEquals(actualUser.getId(), item.getId());
         assertEquals(actualUser.getName(), user.getName());
+        assertEquals(actualUser.getEmail(), user.getEmail());
     }
 
     @Test
@@ -55,6 +58,9 @@ public class ValidTest {
 
         Item actualItem = valid.checkItem(item.getId());
 
+        assertNotNull(actualItem);
+        assertEquals(actualItem.getId(), item.getId());
+        assertEquals(actualItem.getName(), item.getName());
         assertEquals(actualItem.getDescription(), item.getDescription());
     }
 

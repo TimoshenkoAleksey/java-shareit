@@ -15,6 +15,8 @@ import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.comment.mapper.CommentMapper;
 import ru.practicum.shareit.comment.model.Comment;
 import ru.practicum.shareit.comment.repository.CommentRepository;
+import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
@@ -27,8 +29,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -126,6 +127,30 @@ public class ItemServiceTest {
     }
 
     @Test
+    void addItemWithEmptyName() {
+        item.setName("");
+
+        assertThrows(ValidationException.class,
+                () -> itemService.addItem(owner.getId(), ItemMapper.toItemDto(item)));
+    }
+
+    @Test
+    void addItemWithNullDescription() {
+        item.setDescription(null);
+
+        assertThrows(ValidationException.class,
+                () -> itemService.addItem(owner.getId(), ItemMapper.toItemDto(item)));
+    }
+
+    @Test
+    void addItemWithNullAvailable() {
+        item.setAvailable(null);
+
+        assertThrows(ValidationException.class,
+                () -> itemService.addItem(owner.getId(), ItemMapper.toItemDto(item)));
+    }
+
+    @Test
     void updateItem() {
         when(itemRepository.save(any())).thenReturn(item);
         when(valid.checkItem(itemId)).thenReturn(item);
@@ -138,6 +163,35 @@ public class ItemServiceTest {
         assertEquals(itemDto.getName(), item.getName());
         assertEquals(itemDto.getDescription(), item.getDescription());
         verify(itemRepository, times(1)).save(any());
+    }
+
+    @Test
+    void updateItemWithEmptyName() {
+        item.setName("");
+        when(valid.checkItem(itemId)).thenReturn(item);
+        when(valid.checkUser(owner.getId())).thenReturn(owner);
+
+        assertThrows(ValidationException.class,
+                () -> itemService.updateItem(owner.getId(), item.getId(), ItemMapper.toItemDto(item)));
+    }
+
+    @Test
+    void updateItemWithEmptyDescription() {
+        item.setDescription("");
+        when(valid.checkItem(itemId)).thenReturn(item);
+        when(valid.checkUser(owner.getId())).thenReturn(owner);
+
+        assertThrows(ValidationException.class,
+                () -> itemService.updateItem(owner.getId(), item.getId(), ItemMapper.toItemDto(item)));
+    }
+
+    @Test
+    void updateItemWithNotValidOwner() {
+        when(valid.checkItem(itemId)).thenReturn(item);
+        when(valid.checkUser(userId)).thenReturn(user);
+
+        assertThrows(NotFoundException.class,
+                () -> itemService.updateItem(userId, item.getId(), ItemMapper.toItemDto(item)));
     }
 
     @Test
@@ -154,6 +208,18 @@ public class ItemServiceTest {
         assertEquals(commentDto.getId(), comment.getId());
         assertEquals(commentDto.getText(), comment.getText());
         verify(commentRepository, times(1)).save(any());
+    }
+
+    @Test
+    void addCommentWithNotValidOwner() {
+        when(valid.checkItem(itemId)).thenReturn(item);
+        when(valid.checkUser(userId)).thenReturn(user);
+        when(bookingRepository.findFirstByItemIdAndBookerIdAndEndIsBeforeAndStatus(anyLong(), anyLong(), any(), any()))
+                .thenReturn(null);
+
+        assertThrows(ValidationException.class, () -> itemService.addComment(userId, itemId,
+                CommentMapper.toCommentDto(comment)));
+
     }
 
 }

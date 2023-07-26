@@ -63,7 +63,7 @@ public class UserServiceTest {
     @Test
     void findUserByIdWithoutUser() {
         Long userId = user.getId();
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userRepository.findById(any())).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
                 () -> userService.findUserById(userId));

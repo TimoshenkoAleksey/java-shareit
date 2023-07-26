@@ -67,7 +67,7 @@ public class BookingServiceTest {
     @Test
     void findByIdWithNotOwnerId() {
         when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(booking));
-        when(valid.checkUser(ownerId)).thenReturn(user);
+        when(valid.checkUser(anyLong())).thenReturn(owner);
 
         assertThrows(NotFoundException.class,
                 () -> bookingService.findById(bookingId, 3L));

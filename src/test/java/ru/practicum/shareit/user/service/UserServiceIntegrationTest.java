@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @Transactional
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @SpringBootTest
-public class UserServiceITTest {
+public class UserServiceIntegrationTest {
 
     private final EntityManager manager;
     private final UserService service;

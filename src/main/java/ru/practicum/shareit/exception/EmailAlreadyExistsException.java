@@ -5,6 +5,6 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class EmailException extends RuntimeException {
+public class EmailAlreadyExistsException extends RuntimeException {
     private final String parameter;
 }

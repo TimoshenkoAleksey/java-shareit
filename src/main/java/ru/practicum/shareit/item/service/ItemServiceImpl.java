@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDtoForOwner;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
@@ -54,43 +55,45 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> getItemsByUserId(long userId) {
+    public List<ItemDto> getItemsByUserId(long userId, int from, int size) {
         valid.checkUser(userId);
-        List<Item> items = itemRepository.findAllByOwnerId(userId);
+        PageRequest pageRequest = PageRequest.of(from, size);
+        List<Item> items = itemRepository.findAllByOwnerId(userId, pageRequest);
         List<ItemDto> itemsDto = items.stream()
                 .map(ItemMapper::toItemDtoForOwner).collect(Collectors.toList());
         List<Booking> bookings = bookingRepository.findAllByItemIn(items);
         List<Comment> comments = commentRepository.findAllByItemIn(items);
-            for (ItemDto item : itemsDto) {
-                List<Booking> bookingByItem = bookings.stream()
-                        .filter(booking -> Objects.equals(booking.getItem().getId(), item.getId()))
-                        .collect(Collectors.toList());
-                item.setLastBooking(bookingByItem.stream()
-                        .filter(booking -> booking.getStart().isBefore(LocalDateTime.now()))
-                        .filter(booking -> Objects.equals(booking.getStatus(), Status.APPROVED))
-                        .map(BookingMapper::toBookingDtoForOwner)
-                        .max(Comparator.comparing(BookingDtoForOwner::getEnd))
-                        .orElse(null));
-                item.setNextBooking(bookingByItem.stream()
-                        .filter(booking -> booking.getStart().isAfter(LocalDateTime.now()))
-                        .filter(booking -> Objects.equals(booking.getStatus(), Status.APPROVED))
-                        .map(BookingMapper::toBookingDtoForOwner)
-                        .min(Comparator.comparing(BookingDtoForOwner::getStart))
-                        .orElse(null));
-                item.setComments(comments.stream()
-                        .filter(comment -> Objects.equals(comment.getItem().getId(), item.getId()))
-                        .map(CommentMapper::toCommentDto)
-                        .collect(Collectors.toList()));
-            }
+        for (ItemDto item : itemsDto) {
+            List<Booking> bookingByItem = bookings.stream()
+                    .filter(booking -> Objects.equals(booking.getItem().getId(), item.getId()))
+                    .collect(Collectors.toList());
+            item.setLastBooking(bookingByItem.stream()
+                    .filter(booking -> booking.getStart().isBefore(LocalDateTime.now()))
+                    .filter(booking -> Objects.equals(booking.getStatus(), Status.APPROVED))
+                    .map(BookingMapper::toBookingDtoForOwner)
+                    .max(Comparator.comparing(BookingDtoForOwner::getEnd))
+                    .orElse(null));
+            item.setNextBooking(bookingByItem.stream()
+                    .filter(booking -> booking.getStart().isAfter(LocalDateTime.now()))
+                    .filter(booking -> Objects.equals(booking.getStatus(), Status.APPROVED))
+                    .map(BookingMapper::toBookingDtoForOwner)
+                    .min(Comparator.comparing(BookingDtoForOwner::getStart))
+                    .orElse(null));
+            item.setComments(comments.stream()
+                    .filter(comment -> Objects.equals(comment.getItem().getId(), item.getId()))
+                    .map(CommentMapper::toCommentDto)
+                    .collect(Collectors.toList()));
+        }
         return itemsDto;
     }
 
     @Override
-    public List<ItemDto> getItemsByText(String text) {
+    public List<ItemDto> getItemsByText(String text, int from, int size) {
         if (text.isBlank()) {
             return Collections.emptyList();
         }
-        List<Item> items = itemRepository.getItemsByText(text.toLowerCase());
+        PageRequest pageRequest = PageRequest.of(from, size);
+        List<Item> items = itemRepository.getItemsByText(text.toLowerCase(), pageRequest);
         return items.stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
     }
 

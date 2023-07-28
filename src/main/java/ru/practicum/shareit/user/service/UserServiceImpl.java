@@ -2,7 +2,8 @@ package ru.practicum.shareit.user.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.EmailException;
+import ru.practicum.shareit.exception.EmailAlreadyExistsException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
@@ -12,6 +13,8 @@ import ru.practicum.shareit.validation.Valid;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static java.lang.String.format;
 
 @Service
 @AllArgsConstructor
@@ -27,7 +30,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto findUserById(long id) {
-        User user = valid.checkUser(id);
+        User user = userRepository.findById(id).orElseThrow(() ->
+                new NotFoundException(format("Пользователя с id = %s нет в базе", id)));
         return UserMapper.toUserDto(user);
     }
 
@@ -68,11 +72,11 @@ public class UserServiceImpl implements UserService {
         }
         if (userDto.getEmail() != null) {
             if (userDto.getEmail().isBlank()) {
-                throw new EmailException("Email не должен быть пустым");
+                throw new ValidationException("Email не должен быть пустым");
             }
             if (!user.getEmail().equals(userDto.getEmail()) && isEmailPresentInRepository(UserMapper
                     .toUser(userDto))) {
-                throw new EmailException(String.format("Email %s уже есть в базе у другого пользователя", userDto.getEmail()));
+                throw new EmailAlreadyExistsException(String.format("Email %s уже есть в базе у другого пользователя", userDto.getEmail()));
             }
             user.setEmail(userDto.getEmail());
         }

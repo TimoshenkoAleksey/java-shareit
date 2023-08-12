@@ -13,4 +13,5 @@ public class ErrorHandler {
     public ErrorResponse handleIllegalArgumentException(final IllegalArgumentException e) {
         return new ErrorResponse(e.getMessage());
     }
+
 }

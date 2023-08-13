@@ -129,8 +129,12 @@ public class ItemServiceImpl implements ItemService {
         if (owner.getId() != userId) {
             throw new NotFoundException("Пользователь не является собственником вещи и не имеет прав на её изменение.");
         }
-        item.setName(itemDto.getName());
-        item.setDescription(itemDto.getDescription());
+        if (itemDto.getName() != null) {
+            item.setName(itemDto.getName());
+        }
+        if (itemDto.getDescription() != null) {
+            item.setDescription(itemDto.getDescription());
+        }
         if (item.getAvailable() != null) {
             item.setAvailable(itemDto.getAvailable());
         }
@@ -144,5 +148,4 @@ public class ItemServiceImpl implements ItemService {
             throw new ValidationException("Пользователь не может оставить комментарий");
         }
     }
-
 }

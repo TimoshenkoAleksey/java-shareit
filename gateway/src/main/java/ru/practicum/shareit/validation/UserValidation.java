@@ -7,12 +7,25 @@ import ru.practicum.shareit.user.dto.UserDto;
 @Service
 public class UserValidation {
 
-    public void validationBeforeAddAndUpdate(UserDto userDto) {
+    public void validationBeforeAdd(UserDto userDto) {
         if (userDto.getEmail() == null) {
             throw new ValidationException("Email не должен быть пустым");
         }
         if (userDto.getName() == null) {
             throw new ValidationException("Имя пользователя не должно быть пустым");
+        }
+    }
+
+    public void validationBeforeUpdate(UserDto userDto) {
+        if (userDto.getName() != null) {
+            if (userDto.getName().isBlank()) {
+                throw new ValidationException("Имя пользователя не должно быть пустым");
+            }
+        }
+        if (userDto.getEmail() != null) {
+            if (userDto.getEmail().isBlank()) {
+                throw new ValidationException("Email не должен быть пустым");
+            }
         }
     }
 }

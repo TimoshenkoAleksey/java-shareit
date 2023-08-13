@@ -52,12 +52,17 @@ public class UserServiceImpl implements UserService {
 
     private User validationBeforeUpdate(long id, UserDto userDto) {
         User user = valid.checkUser(id);
-        user.setName(userDto.getName());
-        if (!user.getEmail().equals(userDto.getEmail()) && isEmailPresentInRepository(UserMapper
-                .toUser(userDto))) {
-            throw new EmailAlreadyExistsException(String.format("Email %s уже есть в базе у другого пользователя", userDto.getEmail()));
+        if (userDto.getName() != null) {
+            user.setName(userDto.getName());
         }
-        user.setEmail(userDto.getEmail());
+        if (userDto.getEmail() != null) {
+            if (!user.getEmail().equals(userDto.getEmail()) && isEmailPresentInRepository(UserMapper
+                    .toUser(userDto))) {
+                throw new EmailAlreadyExistsException(String.format("Email %s уже есть в базе у другого пользователя",
+                        userDto.getEmail()));
+            }
+            user.setEmail(userDto.getEmail());
+        }
         return user;
     }
 

@@ -32,14 +32,14 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<Object> add(@Valid @RequestBody UserDto userDto) {
-        userValidation.validationBeforeAddAndUpdate(userDto);
+        userValidation.validationBeforeAdd(userDto);
         return userClient.addUser(userDto);
     }
 
     @PatchMapping(value = "/{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> update(@Valid @RequestBody UserDto userDto,
                                          @PathVariable long id) {
-        userValidation.validationBeforeAddAndUpdate(userDto);
+        userValidation.validationBeforeUpdate(userDto);
         return userClient.patchUser(id, userDto);
     }
 

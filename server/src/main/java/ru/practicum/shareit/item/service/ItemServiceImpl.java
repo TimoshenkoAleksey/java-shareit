@@ -100,7 +100,6 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto addItem(long userId, ItemDto itemDto) {
-        validationBeforeAdd(itemDto);
         User owner = valid.checkUser(userId);
         Item item = ItemMapper.toItem(itemDto);
         item.setOwner(owner);
@@ -123,16 +122,6 @@ public class ItemServiceImpl implements ItemService {
         return CommentMapper.toCommentDto(comment);
     }
 
-    private void validationBeforeAdd(ItemDto itemDto) {
-        if (itemDto.getName().isEmpty()) {
-            throw new ValidationException(("Имя вещи не должно быть пустым."));
-        } else if (itemDto.getDescription() == null) {
-            throw new ValidationException("Описание вещи не должно быть пустым.");
-        } else if (itemDto.getAvailable() == null) {
-            throw new ValidationException("Нужно указать, доступна ли вещь.");
-        }
-    }
-
     private Item validationBeforeUpdate(long userId, long itemId, ItemDto itemDto) {
         valid.checkUser(userId);
         Item item = valid.checkItem(itemId);
@@ -140,19 +129,9 @@ public class ItemServiceImpl implements ItemService {
         if (owner.getId() != userId) {
             throw new NotFoundException("Пользователь не является собственником вещи и не имеет прав на её изменение.");
         }
-        if (itemDto.getName() != null) {
-            if (itemDto.getName().isBlank()) {
-                throw new ValidationException("Имя вещи не должно быть пустым.");
-            }
-            item.setName(itemDto.getName());
-        }
-        if (itemDto.getDescription() != null) {
-            if (itemDto.getDescription().isBlank()) {
-                throw new ValidationException("Описание вещи не должно быть пустым.");
-            }
-            item.setDescription(itemDto.getDescription());
-        }
-        if (itemDto.getAvailable() != null) {
+        item.setName(itemDto.getName());
+        item.setDescription(itemDto.getDescription());
+        if (item.getAvailable() != null) {
             item.setAvailable(itemDto.getAvailable());
         }
         return item;
@@ -162,7 +141,7 @@ public class ItemServiceImpl implements ItemService {
         Booking booking = bookingRepository.findFirstByItemIdAndBookerIdAndEndIsBeforeAndStatus(itemId,
                 userId, LocalDateTime.now(), Status.APPROVED);
         if (booking == null) {
-            throw new ValidationException("Пользлватель не мджет оставить комментарий");
+            throw new ValidationException("Пользователь не может оставить комментарий");
         }
     }
 

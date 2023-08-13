@@ -8,10 +8,6 @@ import ru.practicum.shareit.request.service.ItemRequestService;
 
 import java.util.List;
 
-/**
- * TODO Sprint add-item-requests.
- */
-
 @Validated
 @RestController
 @RequestMapping(path = "/requests")

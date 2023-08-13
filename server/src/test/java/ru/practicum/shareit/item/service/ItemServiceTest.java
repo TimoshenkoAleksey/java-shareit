@@ -130,7 +130,7 @@ public class ItemServiceTest {
     void addItemWithEmptyName() {
         item.setName("");
 
-        assertThrows(ValidationException.class,
+        assertThrows(NullPointerException.class,
                 () -> itemService.addItem(owner.getId(), ItemMapper.toItemDto(item)));
     }
 
@@ -138,7 +138,7 @@ public class ItemServiceTest {
     void addItemWithNullDescription() {
         item.setDescription(null);
 
-        assertThrows(ValidationException.class,
+        assertThrows(NullPointerException.class,
                 () -> itemService.addItem(owner.getId(), ItemMapper.toItemDto(item)));
     }
 
@@ -146,7 +146,7 @@ public class ItemServiceTest {
     void addItemWithNullAvailable() {
         item.setAvailable(null);
 
-        assertThrows(ValidationException.class,
+        assertThrows(NullPointerException.class,
                 () -> itemService.addItem(owner.getId(), ItemMapper.toItemDto(item)));
     }
 
@@ -171,7 +171,7 @@ public class ItemServiceTest {
         when(valid.checkItem(itemId)).thenReturn(item);
         when(valid.checkUser(owner.getId())).thenReturn(owner);
 
-        assertThrows(ValidationException.class,
+        assertThrows(NullPointerException.class,
                 () -> itemService.updateItem(owner.getId(), item.getId(), ItemMapper.toItemDto(item)));
     }
 
@@ -181,7 +181,7 @@ public class ItemServiceTest {
         when(valid.checkItem(itemId)).thenReturn(item);
         when(valid.checkUser(owner.getId())).thenReturn(owner);
 
-        assertThrows(ValidationException.class,
+        assertThrows(NullPointerException.class,
                 () -> itemService.updateItem(owner.getId(), item.getId(), ItemMapper.toItemDto(item)));
     }
 

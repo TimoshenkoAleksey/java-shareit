@@ -123,7 +123,6 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException(format("Пользователь с id = %s является владельцем вещи, "
                     + "поэтому не может брать вещь взаймы у себя", userId));
         }
-        checkDate(bookingDtoFrontend);
         Booking booking = BookingMapper.toBooking(bookingDtoFrontend);
         booking.setItem(item);
         booking.setBooker(booker);
@@ -169,13 +168,4 @@ public class BookingServiceImpl implements BookingService {
                 LocalDateTime.now(), Status.APPROVED, sortByStartAsc));
     }
 
-    private void checkDate(BookingDtoFrontend bookingDtoFrontend) {
-        if (bookingDtoFrontend.getEnd().isBefore(bookingDtoFrontend.getStart())) {
-            throw new ValidationException("Время начала бронирования вещи не должна быть позже времени " +
-                    "окончания бронирования");
-        }
-        if (bookingDtoFrontend.getEnd().isEqual(bookingDtoFrontend.getStart())) {
-            throw new ValidationException("Время начала и окончания бронирования вещи не должны совпадать");
-        }
-    }
 }

@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.EmailAlreadyExistsException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
@@ -37,7 +36,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto addUser(UserDto userDto) {
-        validationBeforeAdd(userDto);
         return UserMapper.toUserDto(userRepository.save(UserMapper.toUser(userDto)));
     }
 
@@ -52,34 +50,14 @@ public class UserServiceImpl implements UserService {
         userRepository.deleteById(id);
     }
 
-    private void validationBeforeAdd(UserDto userDto) {
-        if (userDto.getEmail() == null) {
-            throw new ValidationException("Email не должен быть пустым");
-        }
-        if (userDto.getName() == null) {
-            throw new ValidationException("Имя пользователя не должно быть пустым");
-        }
-
-    }
-
     private User validationBeforeUpdate(long id, UserDto userDto) {
         User user = valid.checkUser(id);
-        if (userDto.getName() != null) {
-            if (userDto.getName().isBlank()) {
-                throw new ValidationException("Имя пользователя не должно быть пустым");
-            }
-            user.setName(userDto.getName());
+        user.setName(userDto.getName());
+        if (!user.getEmail().equals(userDto.getEmail()) && isEmailPresentInRepository(UserMapper
+                .toUser(userDto))) {
+            throw new EmailAlreadyExistsException(String.format("Email %s уже есть в базе у другого пользователя", userDto.getEmail()));
         }
-        if (userDto.getEmail() != null) {
-            if (userDto.getEmail().isBlank()) {
-                throw new ValidationException("Email не должен быть пустым");
-            }
-            if (!user.getEmail().equals(userDto.getEmail()) && isEmailPresentInRepository(UserMapper
-                    .toUser(userDto))) {
-                throw new EmailAlreadyExistsException(String.format("Email %s уже есть в базе у другого пользователя", userDto.getEmail()));
-            }
-            user.setEmail(userDto.getEmail());
-        }
+        user.setEmail(userDto.getEmail());
         return user;
     }
 

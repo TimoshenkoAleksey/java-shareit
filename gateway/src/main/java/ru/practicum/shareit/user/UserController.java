@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.validation.UserValidation;
 
 import javax.validation.Valid;
 
@@ -17,6 +18,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RequiredArgsConstructor
 public class UserController {
     private final UserClient userClient;
+    private final UserValidation userValidation;
 
     @GetMapping
     public ResponseEntity<Object> getAll() {
@@ -30,12 +32,14 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<Object> add(@Valid @RequestBody UserDto userDto) {
+        userValidation.validationBeforeAddAndUpdate(userDto);
         return userClient.addUser(userDto);
     }
 
     @PatchMapping(value = "/{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> update(@Valid @RequestBody UserDto userDto,
                                          @PathVariable long id) {
+        userValidation.validationBeforeAddAndUpdate(userDto);
         return userClient.patchUser(id, userDto);
     }
 

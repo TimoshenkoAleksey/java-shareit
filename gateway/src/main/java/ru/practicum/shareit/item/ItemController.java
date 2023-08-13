@@ -7,6 +7,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.validation.ItemValidation;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -18,6 +19,7 @@ import javax.validation.constraints.PositiveOrZero;
 @Validated
 public class ItemController {
     private final ItemClient itemClient;
+    private final ItemValidation itemValidation;
 
     @GetMapping
     public ResponseEntity<Object> getAllByUserId(
@@ -45,6 +47,7 @@ public class ItemController {
     @PostMapping
     public ResponseEntity<Object> addItem(@RequestHeader("X-Sharer-User-Id") @Positive Long userId,
                                           @Valid @RequestBody ItemDto itemDto) {
+        itemValidation.validationBeforeAdd(itemDto);
         return itemClient.addItem(userId, itemDto);
     }
 
@@ -52,6 +55,7 @@ public class ItemController {
     public ResponseEntity<Object> patchItem(@RequestHeader("X-Sharer-User-Id") @Positive Long userId,
                                             @Valid @RequestBody ItemDto itemDto,
                                             @PathVariable("itemId") Long itemId) {
+        itemValidation.validationBeforeUpdate(itemDto);
         return itemClient.patchItem(userId, itemId, itemDto);
     }
 

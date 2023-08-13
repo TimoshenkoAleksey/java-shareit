@@ -33,10 +33,10 @@ public class BookingController {
     }
 
     @GetMapping("/owner")
-    public ResponseEntity<Object> getBookingsForOwnerItems(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                                           @RequestParam(name = "state", defaultValue = "ALL") String stateParam,
-                                                           @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
-                                                           @Positive @RequestParam(defaultValue = "10") Integer size) {
+    public ResponseEntity<Object> getAllBookingsByItemOwnerId(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                                              @RequestParam(name = "state", defaultValue = "ALL") String stateParam,
+                                                              @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
+                                                              @Positive @RequestParam(defaultValue = "10") Integer size) {
         BookingState state = BookingState.from(stateParam)
                 .orElseThrow(() -> new IllegalArgumentException("Unknown state: " + stateParam));
         log.info("Get bookings by owner with userId={} for his items with state {}, from={}, size={}", userId, stateParam, from, size);
@@ -58,9 +58,9 @@ public class BookingController {
     }
 
     @PatchMapping("/{bookingId}")
-    public ResponseEntity<Object> patch(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                        @PathVariable("bookingId") Long bookingId,
-                                        @RequestParam Boolean approved) {
+    public ResponseEntity<Object> patchBooking(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                               @PathVariable("bookingId") Long bookingId,
+                                               @RequestParam Boolean approved) {
         log.info("Patching booking {}, userId={}, approved={}", bookingId, userId, approved);
         return bookingClient.patchBooking(userId, bookingId, approved);
     }

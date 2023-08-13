@@ -60,6 +60,7 @@ public class ItemServiceImpl implements ItemService {
         PageRequest pageRequest = PageRequest.of(from, size);
         List<Item> items = itemRepository.findAllByOwnerId(userId, pageRequest);
         List<ItemDto> itemsDto = items.stream()
+                .sorted(Comparator.comparing(Item::getId))
                 .map(ItemMapper::toItemDtoForOwner).collect(Collectors.toList());
         List<Booking> bookings = bookingRepository.findAllByItemIn(items);
         List<Comment> comments = commentRepository.findAllByItemIn(items);

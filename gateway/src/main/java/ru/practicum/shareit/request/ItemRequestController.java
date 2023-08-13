@@ -26,12 +26,12 @@ public class ItemRequestController {
     }
 
     @GetMapping
-    public ResponseEntity<Object> findAllByUserId(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public ResponseEntity<Object> getAllByUserId(@RequestHeader("X-Sharer-User-Id") Long userId) {
         return requestClient.findRequestsByUserId(userId);
     }
 
     @GetMapping("/all")
-    public ResponseEntity<Object> findAll(
+    public ResponseEntity<Object> getAll(
             @RequestHeader("X-Sharer-User-Id") long userId,
             @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
             @RequestParam(defaultValue = "10") @Positive int size) {
@@ -39,7 +39,7 @@ public class ItemRequestController {
     }
 
     @GetMapping("/{requestId}")
-    public ResponseEntity<Object> findById(
+    public ResponseEntity<Object> getById(
             @RequestHeader("X-Sharer-User-Id") long userId,
             @PathVariable long requestId) {
         return requestClient.findRequestById(userId, requestId);

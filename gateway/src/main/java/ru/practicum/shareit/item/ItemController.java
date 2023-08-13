@@ -43,22 +43,16 @@ public class ItemController {
     }
 
     @PostMapping
-    public ResponseEntity<Object> add(@RequestHeader("X-Sharer-User-Id") @Positive Long userId,
-                                      @Valid @RequestBody ItemDto itemDto) {
+    public ResponseEntity<Object> addItem(@RequestHeader("X-Sharer-User-Id") @Positive Long userId,
+                                          @Valid @RequestBody ItemDto itemDto) {
         return itemClient.addItem(userId, itemDto);
     }
 
     @PatchMapping("/{itemId}")
-    public ResponseEntity<Object> patch(@RequestHeader("X-Sharer-User-Id") @Positive Long userId,
-                                        @Valid @RequestBody ItemDto itemDto,
-                                        @PathVariable("itemId") Long itemId) {
+    public ResponseEntity<Object> patchItem(@RequestHeader("X-Sharer-User-Id") @Positive Long userId,
+                                            @Valid @RequestBody ItemDto itemDto,
+                                            @PathVariable("itemId") Long itemId) {
         return itemClient.patchItem(userId, itemId, itemDto);
-    }
-
-    @DeleteMapping("/{itemId}")
-    public ResponseEntity<Object> deleteItem(@RequestHeader("X-Sharer-User-Id") @Positive long userId,
-                                             @PathVariable("itemId") Long itemId) {
-        return itemClient.deleteItem(userId, itemId);
     }
 
     @PostMapping("/{itemId}/comment")

@@ -18,15 +18,11 @@ public class ItemValidation {
     }
 
     public void validationBeforeUpdate(ItemDto itemDto) {
-        if (itemDto.getName() != null) {
-            if (itemDto.getName().isBlank()) {
-                throw new ValidationException("Имя вещи не должно быть пустым.");
-            }
+        if (itemDto.getName() != null && itemDto.getName().isBlank()) {
+            throw new ValidationException("Имя вещи не должно быть пустым.");
         }
-        if (itemDto.getDescription() != null) {
-            if (itemDto.getDescription().isBlank()) {
-                throw new ValidationException("Описание вещи не должно быть пустым.");
-            }
+        if (itemDto.getDescription() != null && itemDto.getDescription().isBlank()) {
+            throw new ValidationException("Описание вещи не должно быть пустым.");
         }
     }
 }

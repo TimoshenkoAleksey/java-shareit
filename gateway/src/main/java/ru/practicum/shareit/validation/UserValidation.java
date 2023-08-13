@@ -17,15 +17,11 @@ public class UserValidation {
     }
 
     public void validationBeforeUpdate(UserDto userDto) {
-        if (userDto.getName() != null) {
-            if (userDto.getName().isBlank()) {
-                throw new ValidationException("Имя пользователя не должно быть пустым");
-            }
+        if (userDto.getName() != null && userDto.getName().isBlank()) {
+            throw new ValidationException("Имя пользователя не должно быть пустым");
         }
-        if (userDto.getEmail() != null) {
-            if (userDto.getEmail().isBlank()) {
-                throw new ValidationException("Email не должен быть пустым");
-            }
+        if (userDto.getEmail() != null && userDto.getEmail().isBlank()) {
+            throw new ValidationException("Email не должен быть пустым");
         }
     }
 }

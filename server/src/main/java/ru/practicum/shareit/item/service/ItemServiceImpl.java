@@ -135,7 +135,7 @@ public class ItemServiceImpl implements ItemService {
         if (itemDto.getDescription() != null) {
             item.setDescription(itemDto.getDescription());
         }
-        if (item.getAvailable() != null) {
+        if (itemDto.getAvailable() != null) {
             item.setAvailable(itemDto.getAvailable());
         }
         return item;
